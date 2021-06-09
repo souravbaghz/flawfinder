@@ -19,7 +19,7 @@
 .\"
 .\" Man page created 17 May 2001 by David A. Wheeler (dwheeler@dwheeler.com)
 .\"
-.TH FLAWFINDER 1 "4 Apr 2018" "Flawfinder" "Flawfinder"
+.TH FLAWFINDER 1 "3 Jun 2021" "Flawfinder" "Flawfinder"
 .SH NAME
 flawfinder \- lexically find potential security flaws ("hits") in source code
 .SH SYNOPSIS
@@ -52,6 +52,7 @@ flawfinder \- lexically find potential security flaws ("hits") in source code
 .RB [ \-\-dataonly | \-D ]
 .RB [ \-\-html | \-H ]
 .RB [ \-\-immediate | -i ]
+.RB [ \-\-sarif ]
 .RB [ \-\-singleline | \-S ]
 .RB [ \-\-omittime ]
 .RB [ \-\-quiet | \-Q ]
@@ -221,7 +222,10 @@ Not every hit is necessarily a security vulnerability, and
 there may be other security vulnerabilities not reported by the tool.
 .PP
 Flawfinder can easily integrate into a continuous integration system.
-You might want to check out the \-\-error\-level option to help do that.
+You might want to check out the \-\-error\-level option to help do that, e.g.,
+using \-\-error\-level=4 will cause an error to be returned if flawfinder
+finds a vulnerability of level 4 or higher.
+
 .PP
 Flawfinder is released under the GNU GPL license version 2 or later (GPLv2+).
 .PP
@@ -300,7 +304,8 @@ integrated development environments; see the examples for
 more information.
 .PP
 Flawfinder includes many other options, including ones to
-create HTML versions of the output (useful for prettier displays).
+create HTML versions of the output (useful for prettier displays) and
+OASIS Static Analysis Results Interchange Format (SARIF) output.
 The next section describes those options in more detail.
 
 .SH OPTIONS
@@ -534,6 +539,35 @@ Format the output as HTML instead of as simple text.
 .BI -i
 Immediately display hits (don't just wait until the end).
 
+
+.TP
+.BI \-\-sarif
+Produce output in the OASIS
+Static Analysis Results Interchange Format (SARIF) format (a JSON-based format).
+The goals of the SARIF format, as explained in
+version 2.1.0 (27 March 2020) of its specification, include being able to
+"comprehensively capture the range of data produced by commonly
+used static analysis tools."
+SARIF output identifies the tool name as "Flawfinder".
+The flawfinder levels 0 through 5 are mapped to SARIF rank (by dividing by 5),
+SARIF level, and the default viewer action as follows:
+
+Flawfinder 0: SARIF rank 0.0, SARIF level note, Does not display by default
+
+Flawfinder 1: SARIF rank 0.2, SARIF level note, Does not display by default
+
+Flawfinder 2: SARIF rank 0.4, SARIF level note, Does not display by default
+
+Flawfinder 3: SARIF rank 0.6, SARIF level warning, Displays by default, does not break build / other processes
+
+Flawfinder 4: SARIF rank 0.8, SARIF level error, Displays by default, breaks build/ other processes
+
+Flawfinder 5: SARIF rank 1.0, SARIF level error, Displays by default, breaks build/ other processes
+
+A big thanks to Yong Yan implementing SARIF output generation for flawfinder!
+For more about the SARIF format, see:
+https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
+
 .TP
 .BI "\-\-singleline"
 .TP
@@ -701,6 +735,14 @@ Examine all the C/C++ files in the directory
 reporting on all hits found.
 By default flawfinder will skip symbolic links and
 directories with names that start with a period.
+
+.TP
+.B "flawfinder \-\-error-level=4 ."
+Examine all the C/C++ files in the current directory
+and its subdirectories (recursively);
+return an error code if there are vulnerabilities
+level 4 and up (the two highest risk levels).
+This is a plausible way to use flawfinder in a continuous integration system.
 
 .TP
 .B "flawfinder \-\-minlevel=4 ."
@@ -1223,9 +1265,9 @@ This is not a bug, this is intended behavior.
 Flawfinder will report hits even if they are between
 a literal "#if 0" and "#endif".
 It would be possible to change this particular situation, but directly
-using "#if 0" to comment-out code (other than during debugging) is itself
-that the removal is very temporary (in which case we should report it) or
-an indicator of a problem with poor code practices.
+using "#if 0" to comment-out code (other than during debugging) indicates
+(1) the removal is very temporary (in which case we should still report it) or
+(2) very poor code practices.
 If you want to permanently get rid of code, then
 delete it instead of using "#if 0", since you can always see what it was
 using your version control software.

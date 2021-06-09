@@ -1,3 +1,26 @@
+2021-06-02 David A. Wheeler
+	* Version 2.0.17
+	* Fix the distributed tarball, which didn't include the
+	   key source file due to the earlier file restructure.
+	* Minor code style fix, which simplifies the code slightly.
+	* Update date in manual page to 2021. That's important because
+	  the documentation now includes information on `--sarif`.
+
+2021-05-31 David A. Wheeler
+	* Version 2.0.16
+	* The distributed source file is now flawfinder.py, not flawfinder.
+	  This is part of a change that improves
+	  improve cross-platform ease-of-use by using entry_points.
+	  That said, "make install" will still
+	  install it as "flawfinder" (so those who install it via
+	  "make install" will see no change). Many thanks to Ben Spoor!
+	* Added support for generating SARIF output, use --sarif.
+	  A big thanks to Yong Yan for this work!
+	* Track curly brace level to reduce some problems, my thanks to
+	  Greg Myers for the work!
+	* Improved handling of Git patch format, thanks to
+	  Robin Geffroy.
+
 2021-01-11 David A. Wheeler
 	* Version 2.0.15
 	* Fixed some release problems in 2.0.14.
